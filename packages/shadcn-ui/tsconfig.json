@@ -1,0 +1,12 @@
+{
+  "extends": [
+    "@repo/typescript-config/vite.json",
+    "@repo/typescript-config/react-library.json"
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}

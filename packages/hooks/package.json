@@ -1,0 +1,23 @@
+{
+  "name": "@repo/hooks",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@repo/shadcn-ui": "workspace:*",
+    "@tanstack/react-query": "^5.76.1",
+    "lodash-es": "^4.17.21",
+    "react": "^19.1.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/lodash-es": "^4.17.12",
+    "@types/react": "^19.1.4"
+  }
+}
