@@ -7,7 +7,6 @@ import { Spinner } from "../components/Spinner";
 import { useSettingsStore } from "../stores/settings.store";
 import { Button } from "@repo/shadcn-ui";
 import Masonry from "react-masonry-css";
-import { useCallback, useRef } from "react";
 
 export const Route = createFileRoute("/posts/")({
   component: Posts,
@@ -20,20 +19,20 @@ function Posts() {
   const { tags: activatedTags } = useTagsStore();
 
   // Use Activated Settings
-  const { r18 } = useSettingsStore();
-  const activatedSettings = { r18: r18 ? "" : "rating:general" };
+  const { r18, source } = useSettingsStore();
+  const tagsSettings = { r18: r18 ? "" : "rating:general" };
 
   // Combine Tags and Settings
   const debouncedAllTags = useDebounce(
-    [...activatedTags, ...Object.values(activatedSettings)],
+    [...activatedTags, ...Object.values(tagsSettings)],
     300
   );
 
   // Infinite scroll related
-  const sizeFetch = 35;
+  const sizeFetch = 50;
   const fetchPosts = async ({ pageParam }: { pageParam: number }) =>
     getData(
-      postsApi.getAllPosts({
+      postsApi.getAllPosts(source, {
         limit: sizeFetch,
         page: pageParam,
         tags: debouncedAllTags,
@@ -41,48 +40,33 @@ function Posts() {
     );
 
   const {
-    data: posts,
+    data: postsResponse,
     hasNextPage,
     isFetching,
-    isLoading,
     status,
     error,
     fetchNextPage,
   } = useInfiniteQuery({
-    queryKey: ["posts", debouncedAllTags],
+    queryKey: ["posts", debouncedAllTags, source],
     queryFn: fetchPosts,
     initialPageParam: 1,
-    getNextPageParam: (lastFetch) => {
-      if (lastFetch && lastFetch["@attributes"]) {
-        const { offset, limit, count } = lastFetch["@attributes"];
-        const totalPages = Math.ceil(count / limit);
-        const currentPage = offset / limit + 1;
+    getNextPageParam: (lastFetch, allPages) => {
+      if (lastFetch) {
+        // If response has meta
+        if (lastFetch.max_page) {
+          const { current_page, max_page } = lastFetch;
+          return current_page < max_page ? current_page + 1 : undefined;
+        } else {
+          if (!lastFetch.posts || lastFetch.posts.length === 0)
+            return undefined;
 
-        return currentPage < totalPages ? currentPage + 1 : undefined;
+          return allPages.length + 1;
+        }
       } else {
         return undefined;
       }
     },
   });
-
-  // Scroll observer
-  const observer = useRef<IntersectionObserver>(null);
-  const lastElementRef = useCallback(
-    (node: HTMLDivElement) => {
-      if (isLoading) return;
-
-      if (observer.current) observer.current.disconnect();
-
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetching) {
-          fetchNextPage();
-        }
-      });
-
-      if (node) observer.current.observe(node);
-    },
-    [fetchNextPage, hasNextPage, isFetching, isLoading]
-  );
 
   return (
     <div className="w-full flex flex-col items-center">
@@ -106,16 +90,16 @@ function Posts() {
             className="my-masonry-grid mb-4"
             columnClassName="my-masonry-grid_column"
           >
-            {posts.pages.map(
+            {postsResponse.pages.map(
               (resp) =>
                 resp &&
-                resp.post &&
-                resp.post.map((p, i) => (
-                  <div ref={lastElementRef} key={i}>
+                resp.posts &&
+                resp.posts.map((p, i) => (
+                  <div key={i}>
                     <img
+                      {...(p.preview_url && { src: p.preview_url })}
                       className="border rounded hover:cursor-pointer w-full h-auto"
                       key={p.id}
-                      src={p.preview_url}
                       onClick={() =>
                         navigate({
                           to: "/posts/$postId",

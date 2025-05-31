@@ -130,6 +130,7 @@ func (c *Client) FetchPosts(limit int, page int, tags []string, id *int) (*model
 		for i, p := range *resPosts {
 			tags := strings.Split(p.TagString, " ")
 			artistTags := strings.Split(p.TagStringArtist, " ")
+			createdAt, _ := time.Parse("2025-05-31T09:36:11.411-04:00", p.CreatedAt)
 
 			var previewUrl string
 			var sampleUrl string
@@ -163,7 +164,7 @@ func (c *Client) FetchPosts(limit int, page int, tags []string, id *int) (*model
 				Source: p.Source,
 				Md5: p.Md5,
 				Rating: p.Rating,
-				ParentID: p.ParentID,
+				ParentID: &p.ParentID,
 				FileURL: originalUrl,
 				PreviewURL: previewUrl,
 				SampleURL: sampleUrl,
@@ -174,7 +175,7 @@ func (c *Client) FetchPosts(limit int, page int, tags []string, id *int) (*model
 				SampleWidth: sampleWidth,
 				SampleHeight: sampleHeight,
 				Artist: artistTags,
-				CreatedAt: p.CreatedAt,
+				CreatedAt: createdAt,
 				HasChildren: p.HasChildren,
 				Tags: tags,
 			}

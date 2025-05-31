@@ -9,18 +9,21 @@ import { createFileRoute } from "@tanstack/react-router";
 import { isAxiosError } from "axios";
 import { Spinner } from "../components/Spinner";
 import { useEffect, useMemo } from "react";
+import { useSettingsStore } from "../stores/settings.store";
 
 export const Route = createFileRoute("/posts/$postId")({
   component: Post,
   loader: async ({ params }) => {
-    const post = postsApi.getSinglePost(parseInt(params.postId));
+    const source = useSettingsStore.getState().source;
+    const post = postsApi.getSinglePost(source, parseInt(params.postId));
     const postData = await getData(post);
-    queryClient.setQueryData(["post", params.postId], postData);
+
+    queryClient.setQueryData(["post", params.postId, source], postData);
 
     if (!postData || isAxiosError(postData)) return {};
 
     return {
-      crumb: postData.post[0].title || postData.post[0].id,
+      crumb: postData.posts[0].id,
     };
   },
   errorComponent: () => <p className="text-center mx-auto">Not Found</p>,
@@ -30,16 +33,19 @@ function Post() {
   const { postId } = Route.useParams();
   const id = parseInt(postId);
 
-  const { data: post } = useQuery({
-    queryKey: ["post", postId],
-    queryFn: () => getData(postsApi.getSinglePost(id)),
+  // Settings
+  const { source } = useSettingsStore();
+
+  const { data: postResponse } = useQuery({
+    queryKey: ["post", postId, source],
+    queryFn: () => getData(postsApi.getSinglePost(source, id)),
     initialData: () => queryClient.getQueryData<PostsResponse>(["posts"]),
   });
 
-  const imageID = post?.post.find((p) => p.id === id)?.id;
+  const imageID = postResponse?.posts.find((p) => p.id === id)?.id;
   const { data: postImage, isFetching } = useQuery({
-    queryKey: ["post-image", imageID],
-    queryFn: () => getData(postsApi.getImagePost(imageID)),
+    queryKey: ["post-image", imageID, source],
+    queryFn: () => getData(postsApi.getImagePost(source, imageID)),
     initialData: () => queryClient.getQueryData<Blob>(["post-image"]),
     enabled: !!imageID,
   });
@@ -58,13 +64,13 @@ function Post() {
     <div className="flex justify-center overflow-hidden min-h-0 max-h-full">
       {isFetching ? (
         <Spinner />
-      ) : post ? (
+      ) : postResponse ? (
         <div className="flex-1 overflow-auto gap-6">
           {imageURL ? (
             <img
               className="mx-auto text-center cursor-pointer"
               src={imageURL}
-              onClick={() => window.open(post.post[0].file_url)}
+              onClick={() => window.open(imageURL)}
             />
           ) : (
             <p className="text-center mx-auto">Image failed to load</p>

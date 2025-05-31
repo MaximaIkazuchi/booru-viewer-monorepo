@@ -5,6 +5,7 @@ import { useDebounce } from "@repo/hooks";
 import { SearchWithClear } from "../components/SearchWithClear";
 import { useTagsControl } from "../hooks/useTagsControl";
 import { Button } from "@repo/shadcn-ui";
+import { useSettingsStore } from "../stores/settings.store";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -15,9 +16,13 @@ function Index() {
 
   const { TagsControlComponent, add } = useTagsControl();
 
+  // Settings
+  const { source } = useSettingsStore();
+
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const { ResultComponent } = useSearchTags({
+    source,
     queryKey: "tags-home-page",
     limit: 10,
     search: debouncedSearch,

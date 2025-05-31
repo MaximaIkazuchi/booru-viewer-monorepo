@@ -1,21 +1,37 @@
-import { TagsResponse } from "../typings";
+import { FetchSource, TagsResponse } from "../typings";
 import { apiClient } from "../client";
+import { AxiosResponse } from "axios";
+
+export type Order = "date" | "count" | "name";
 
 export const tagsApi = {
-  getAllTags: async (opts?: {
-    page: number;
-    limit: number;
-    search?: string;
-    order?: "asc" | "desc";
-    orderBy?: "date" | "count" | "name";
-  }): Promise<TagsResponse> => {
-    const url = opts
-      ? `/tags?page=${opts.page}&limit=${opts.limit}&search=${opts.search ?? ""}&order=${opts.order ?? "desc"}&orderby=${opts.orderBy ?? "count"}`
-      : `/tags`;
+  getAllTags: async (
+    source: FetchSource,
+    opts?: {
+      page: number;
+      limit: number;
+      search?: string;
+      order?: Order;
+    }
+  ): Promise<AxiosResponse<TagsResponse>> => {
+    const params = opts
+      ? {
+          page: opts.page,
+          limit: opts.limit,
+          search: opts.search || "",
+          order: opts.order || "count",
+        }
+      : {};
 
-    return (await apiClient(url)).data;
+    return apiClient.get(`/${source}/tags`, {
+      params,
+    });
   },
-  getSingleTag: async (tagID: number): Promise<TagsResponse> => {
-    return (await apiClient(`/tags/${tagID}`)).data;
+
+  getSingleTag: async (
+    source: FetchSource,
+    tagID: number
+  ): Promise<AxiosResponse<TagsResponse>> => {
+    return apiClient.get(`/${source}/posts/${tagID}`);
   },
 };

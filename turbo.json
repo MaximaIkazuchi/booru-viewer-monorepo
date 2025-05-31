@@ -1,6 +1,6 @@
 {
   "$schema": "https://turborepo.com/schema.json",
-  "ui": "stream",
+  "ui": "tui",
   "tasks": {
     "build": {
       "env": ["CLIENT_API_URL", "API_URL", "API_KEY_SEARCH"],

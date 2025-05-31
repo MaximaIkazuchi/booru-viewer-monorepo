@@ -1,4 +1,4 @@
-import { tagsApi } from "@repo/api-client";
+import { FetchSource, getData, Order, tagsApi } from "@repo/api-client";
 import { Badge, ScrollArea } from "@repo/shadcn-ui";
 import { useQuery } from "@tanstack/react-query";
 import { TruncatingTooltip } from "../components/TruncatingTooltip";
@@ -7,27 +7,34 @@ import { cn } from "@repo/shadcn-ui";
 
 type UseSearchTagsProps = {
   queryKey: string;
+  source: FetchSource;
   limit?: number;
   startPage?: number;
   search?: string;
+  order?: Order;
   onAddTag?: (tag: string) => void;
 };
 
 export const useSearchTags = ({
   queryKey,
+  source,
   limit = 15,
   startPage = 1,
   search = "",
+  order = "count",
   onAddTag,
 }: UseSearchTagsProps) => {
   const queryResult = useQuery({
-    queryKey: [queryKey, search],
+    queryKey: [queryKey, search, source],
     queryFn: () =>
-      tagsApi.getAllTags({
-        limit: limit,
-        page: startPage,
-        search: search,
-      }),
+      getData(
+        tagsApi.getAllTags(source, {
+          page: startPage,
+          limit: limit,
+          search: search,
+          order: order,
+        })
+      ),
   });
 
   const ResultComponent = ({
@@ -40,8 +47,8 @@ export const useSearchTags = ({
           {...props}
           className={cn("border rounded-md", props.className)}
         >
-          {queryResult.data.tag ? (
-            queryResult.data.tag.map((tag, i) => (
+          {queryResult.data.tags ? (
+            queryResult.data.tags.map((tag, i) => (
               <div
                 key={i}
                 className="grid grid-cols-[1fr_auto] hover:bg-secondary hover:cursor-pointer p-2"

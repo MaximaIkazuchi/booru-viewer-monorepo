@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"time"
 )
 
 type Order string
@@ -121,13 +122,16 @@ func (c *Client) FetchTags(limit int, page int, order Order, search string, id *
 
 		tags := make([]model.Tag, len(*resTags))
 		for i, t := range *resTags {
+			createdAt, _ := time.Parse("2025-05-31T09:36:11.411-04:00", t.CreatedAt)
+			updatedAt, _ := time.Parse("2025-05-31T09:36:11.411-04:00", t.UpdatedAt)
+
 			tags[i] = model.Tag{
 				ID: t.ID,
 				Name: t.Name,
 				Count: t.PostCount,
 				Category: model.Category(t.Category),
-				CreatedAt: &t.CreatedAt,
-				UpdatedAt: &t.UpdatedAt,
+				CreatedAt: &createdAt,
+				UpdatedAt: &updatedAt,
 			}
 		}
 

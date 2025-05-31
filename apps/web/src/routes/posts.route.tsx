@@ -8,6 +8,11 @@ import {
   DialogTitle,
   DialogTrigger,
   Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   SidebarProvider,
   Switch,
 } from "@repo/shadcn-ui";
@@ -48,18 +53,24 @@ function PostsLayout() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
 
+  // Settings
   const {
-    data: tags,
+    r18,
+    source,
+    toggle: toggleSettings,
+    set: setSettings,
+  } = useSettingsStore();
+
+  const {
+    data: tagsResponse,
     isFetching,
     error,
   } = useSearchTags({
+    source,
     queryKey: "tags-post-page",
     limit: 25,
     search: debouncedSearch,
   });
-
-  // Posts Settings
-  const { r18, toggle: toggleSettings } = useSettingsStore();
 
   return (
     <SidebarProvider>
@@ -77,7 +88,7 @@ function PostsLayout() {
                 search={search}
                 setSearch={setSearch}
               />
-              <TagsControlComponent className="flex lg:hidden gap-2 p-2" />
+              <TagsControlComponent className="flex lg:hidden gap-2" />
             </>
           ),
           groups: [
@@ -92,8 +103,8 @@ function PostsLayout() {
                 <div className="p-4 bg-red-100 text-red-700 rounded mx-auto">
                   Error loading tags: {error.message}
                 </div>
-              ) : tags && tags.tag ? (
-                tags.tag.map(
+              ) : tagsResponse && tagsResponse.tags ? (
+                tagsResponse.tags.map(
                   (t, i) =>
                     t.name && (
                       <div
@@ -131,7 +142,7 @@ function PostsLayout() {
                       Make changes to your settings here.
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="w-full flex flex-col">
+                  <div className="w-full flex flex-col gap-4">
                     <div className="flex items-center space-x-2">
                       <Switch
                         id="r18-toggle"
@@ -139,6 +150,21 @@ function PostsLayout() {
                         onCheckedChange={() => toggleSettings("r18")}
                       />
                       <Label htmlFor="r18-toggle">Show R-18</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Label htmlFor="source-toggle">Source Switch</Label>
+                      <Select
+                        value={source}
+                        onValueChange={(value) => setSettings("source", value)}
+                      >
+                        <SelectTrigger id="source-toggle" className="w-fit">
+                          <SelectValue placeholder="Source" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="danbooru">Danbooru</SelectItem>
+                          <SelectItem value="gelbooru">Gelbooru</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </DialogContent>

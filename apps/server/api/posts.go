@@ -125,8 +125,6 @@ func (h *Handler) GetPostImage(c *gin.Context) {
 	file.Seek(0, 0)
 	contentType := http.DetectContentType(buff)
 
-	fmt.Println(contentType)
-
 	c.Writer.Header().Set("Content-Type", contentType)
 	c.Writer.WriteHeader(http.StatusOK)
 

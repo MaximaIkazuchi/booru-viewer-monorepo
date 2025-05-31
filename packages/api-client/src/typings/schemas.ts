@@ -1,55 +1,48 @@
-export type Attributes = {
-  limit: number;
-  offset: number;
-  count: number;
-};
+export type FetchSource = "danbooru" | "gelbooru";
 
 export type PostsResponse = {
-  "@attributes": Attributes;
-  post: Post[];
+  current_page: number;
+  max_page: number | null;
+  count: number | null;
+  source: string;
+  posts: Post[];
 };
 
 export type Post = {
   id: number;
-  created_at: string;
-  score: number;
-  width: number;
-  height: number;
-  md5: string;
-  directory: string;
-  image: string;
-  rating: string;
+  title: string | null;
+  created_at: Date;
   source: string;
-  change: number;
-  owner: string;
-  creator_id: number;
-  parent_id: number;
-  sample: number;
-  preview_height: number;
-  preview_width: number;
-  tags: string;
-  title: string;
-  has_notes: string;
-  has_comments: string;
+  md5: string;
+  rating: string;
+  parent_id: number | null;
+  has_children: boolean;
+  artist: string[] | null;
+  tags: string[];
   file_url: string;
   preview_url: string;
   sample_url: string;
-  sample_height: number;
+  width: number;
+  height: number;
+  preview_width: number;
+  preview_height: number;
   sample_width: number;
-  status: string;
-  post_locked: number;
-  has_children: string;
+  sample_height: number;
 };
 
 export type TagsResponse = {
-  "@attributes": Attributes;
-  tag: Tag[];
+  current_page: number;
+  max_page: number | null;
+  count: number | null;
+  source: string;
+  tags: Tag[];
 };
 
 export type Tag = {
   id: number;
   name: string;
   count: number;
-  type: number;
-  ambiguous: number;
+  category: number;
+  created_at: Date | null;
+  updated_at: Date | null;
 };

@@ -1,30 +1,42 @@
-import { PostsResponse } from "../typings";
+import { FetchSource, PostsResponse } from "../typings";
 import { apiClient } from "../client";
 import { AxiosResponse } from "axios";
 
 export const postsApi = {
-  getAllPosts: async (opts?: {
-    page: number;
-    limit: number;
-    tags?: string[];
-  }): Promise<AxiosResponse<PostsResponse>> => {
-    const url = opts
-      ? `/posts?limit=${opts.limit}&page=${opts.page}&tags=${opts.tags ? opts.tags.join("+") : ""}`
-      : `/posts`;
-    return apiClient.get(url);
+  getAllPosts: async (
+    source: FetchSource,
+    opts?: {
+      page: number;
+      limit: number;
+      tags?: string[];
+    }
+  ): Promise<AxiosResponse<PostsResponse>> => {
+    const params = opts
+      ? {
+          limit: opts.limit,
+          page: opts.page,
+          tags: opts.tags ? opts.tags.join(" ") : "",
+        }
+      : {};
+
+    return apiClient.get(`/${source}/posts`, {
+      params,
+    });
   },
 
   getSinglePost: async (
+    source: FetchSource,
     postID: number
   ): Promise<AxiosResponse<PostsResponse>> => {
-    return apiClient.get(`/posts/${postID}`);
+    return apiClient.get(`/${source}/posts/${postID}`);
   },
 
-  getImagePost: async (postID?: number): Promise<AxiosResponse<Blob>> => {
-    const url = postID
-      ? `/post/image/${postID}`
-      : "https://placehold.co/600x400@3x.png";
-    return apiClient.get(url, {
+  getImagePost: async (
+    source: FetchSource,
+    postID?: number
+  ): Promise<AxiosResponse<Blob>> => {
+    const id = postID || 404;
+    return apiClient.get(`${source}/img/${id}`, {
       responseType: "blob",
     });
   },
