@@ -1,64 +1,41 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"net/http"
-	"os"
-	"path/filepath"
+	"booru-viewer/server/api"
+	"booru-viewer/server/client"
 	"time"
 
-	"booru-viewer/server/api"
-	"booru-viewer/server/handler/posts"
-	"booru-viewer/server/handler/tags"
-
-	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
-	"github.com/rs/cors"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env files")
+	gelbooruClient := client.InitClient(client.SOURCE_GELBOORU, 10*time.Second)
+	gelbooruHandler := api.NewHandler(gelbooruClient)
+
+	danbooruClient := client.InitClient(client.SOURCE_DANBOORU, 10*time.Second)
+	danbooruHandler := api.NewHandler(danbooruClient)
+
+	r := gin.Default()
+	api := r.Group("/api/v1")
+	{
+		gelbooru := api.Group("/gelbooru")
+		{
+			gelbooru.GET("/posts", gelbooruHandler.GetPosts)
+			gelbooru.GET("/posts/:id", gelbooruHandler.GetSinglePost)
+			gelbooru.GET("/tags", gelbooruHandler.GetTags)
+			gelbooru.GET("/tags/:id", gelbooruHandler.GetSingleTag)
+		}
+
+		danbooru := api.Group("/danbooru")
+		{
+			danbooru.GET("/posts", danbooruHandler.GetPosts)
+			danbooru.GET("/posts/:id", danbooruHandler.GetSinglePost)
+			danbooru.GET("/tags", danbooruHandler.GetTags)
+			danbooru.GET("/tags/:id", danbooruHandler.GetSingleTag)
+		}
+
+		api.GET("/img/:id", danbooruHandler.GetPostImage)
 	}
-	baseAPI := os.Getenv("CLIENT_API_URL")
-	apiKey := os.Getenv("API_KEY_SEARCH")
-	client := api.NewClient(fmt.Sprintf("%s%s", baseAPI, apiKey), 5*time.Second)
 
-	router := mux.NewRouter()
-	subrouter := router.PathPrefix("/api/v1").Subrouter()
-
-	// Posts related endpoint
-	posts.Register(subrouter, &posts.Posts{ Client: client })
-
-	// Tags related endpoint
-	tags.Register(subrouter, &tags.Tags{ Client: client })
-
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8080", "http://localhost:5173"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Content-Type", "Authorization"},
-		AllowCredentials: true,
-	})
-
-    staticDir := "./fe"
-    router.PathPrefix("/").Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        path := filepath.Join(staticDir, r.URL.Path)
-        _, err := os.Stat(path)
-
-        if os.IsNotExist(err) || isDir(path) {
-            http.ServeFile(w, r, filepath.Join(staticDir, "index.html"))
-        } else {
-            http.ServeFile(w, r, path)
-        }
-    }))
-
-	fmt.Println("Server running at http://localhost:8080")
-	log.Fatal(http.ListenAndServe("0.0.0.0:8080", c.Handler(router)))
-}
-
-func isDir(path string) bool {
-    info, err := os.Stat(path)
-    return err == nil && info.IsDir()
+	r.Run("localhost:8080")
 }
