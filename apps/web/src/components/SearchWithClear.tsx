@@ -1,5 +1,5 @@
 import { Button, Input } from "@repo/shadcn-ui";
-import { CopyMinus } from "lucide-react";
+import { Delete } from "lucide-react";
 import React, { SetStateAction } from "react";
 
 export const SearchWithClear = ({
@@ -20,7 +20,7 @@ export const SearchWithClear = ({
         value={search}
       />
       <Button variant={"outline"} onClick={() => setSearch("")}>
-        <CopyMinus />
+        <Delete />
       </Button>
     </div>
   );

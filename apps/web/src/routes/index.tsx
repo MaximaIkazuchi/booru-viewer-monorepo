@@ -26,17 +26,19 @@ function Index() {
     queryKey: "tags-home-page",
     limit: 10,
     search: debouncedSearch,
-    onAddTag: add,
+    onAddTag: (tag) => {
+      setSearch("");
+      add(tag);
+    },
   });
 
   return (
     <div className="flex flex-col gap-4 items-center w-full min-h-screen overflow-hidden p-6">
-      <div className="flex flex-col justify-center items-center">
+      <div className="flex flex-col justify-center items-center -mb-6">
         <img className="size-4/6" src="/yabv.png" />
         <p className="font-bold">Yet Another Booru Viewer</p>
-        <p className="text-sm italic underline">WIP</p>
       </div>
-      <div className="w-full lg:w-2/5 flex justify-center items-center">
+      <div className="w-full md:w-3/5 lg:w-2/5 flex justify-center items-center">
         <div className="flex flex-col gap-2">
           <TagsControlComponent className="flex gap-2" />
           <Button
@@ -48,7 +50,7 @@ function Index() {
           </Button>
         </div>
       </div>
-      <div className="relative w-full lg:w-2/5">
+      <div className="relative w-full md:w-3/5 lg:w-2/5">
         <SearchWithClear
           placeholder="Search with tags..."
           search={search}

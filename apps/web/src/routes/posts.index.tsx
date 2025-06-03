@@ -19,8 +19,15 @@ function Posts() {
   const { tags: activatedTags } = useTagsStore();
 
   // Use Activated Settings
-  const { r18, source } = useSettingsStore();
-  const tagsSettings = { r18: r18 ? "" : "rating:general" };
+  const { filter, source } = useSettingsStore();
+  const tagsSettings = {
+    filter:
+      filter == "general"
+        ? "rating:general"
+        : filter == "sensitive"
+          ? "-rating:explicit"
+          : "-rating:general",
+  };
 
   // Combine Tags and Settings
   const debouncedAllTags = useDebounce(
@@ -87,15 +94,15 @@ function Posts() {
               768: 3,
               640: 2,
             }}
-            className="my-masonry-grid mb-4"
-            columnClassName="my-masonry-grid_column"
+            className="flex w-full mb-4 -ml-4"
+            columnClassName="pl-4 bg-clip-padding"
           >
             {postsResponse.pages.map(
               (resp) =>
                 resp &&
                 resp.posts &&
                 resp.posts.map((p, i) => (
-                  <div key={i}>
+                  <div key={i} className="mb-4">
                     <img
                       {...(p.preview_url && { src: p.preview_url })}
                       className="border rounded hover:cursor-pointer w-full h-auto"

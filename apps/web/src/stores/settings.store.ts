@@ -9,13 +9,13 @@ export type SettingsState = {
 
 type Settings = {
   source: FetchSource;
-  r18: boolean;
+  filter: "general" | "sensitive" | "explicit";
 };
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      r18: false,
+      filter: "general",
       source: "gelbooru",
       toggle: (key) => set((state) => ({ [key]: !state[key] })),
       set: (key, value) => set(() => ({ [key]: value })),

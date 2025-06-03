@@ -23,22 +23,17 @@ export const useTagsControl = () => {
           }
           content={<p>Reset</p>}
         />
-        <div className="flex flex-wrap gap-2">
-          {tags.map((t) => (
-            <AppTooltip
-              key={t}
-              trigger={
-                <Badge
-                  className="flex gap-2 hover:cursor-pointer"
-                  onClick={() => remove(t)}
-                >
-                  {t}
-                </Badge>
-              }
-              content={<p>Click to remove</p>}
-            />
-          ))}
-        </div>
+        {tags.map((t) => (
+          <AppTooltip
+            key={t}
+            trigger={
+              <Badge className="hover:cursor-pointer" onClick={() => remove(t)}>
+                {t}
+              </Badge>
+            }
+            content={<p>Click to remove</p>}
+          />
+        ))}
       </div>
     );
 

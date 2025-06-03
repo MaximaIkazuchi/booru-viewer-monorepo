@@ -51,7 +51,7 @@ export const useSearchTags = ({
             queryResult.data.tags.map((tag, i) => (
               <div
                 key={i}
-                className="grid grid-cols-[1fr_auto] hover:bg-secondary hover:cursor-pointer p-2"
+                className="grid grid-cols-[1fr_auto] hover:bg-secondary hover:cursor-pointer p-1"
                 onClick={() => {
                   return onAddTag && onAddTag(tag.name);
                 }}

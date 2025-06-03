@@ -8,20 +8,11 @@ import {
   DialogTitle,
   DialogTrigger,
   Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  RadioGroup,
+  RadioGroupItem,
   SidebarProvider,
-  Switch,
 } from "@repo/shadcn-ui";
-import {
-  createFileRoute,
-  Outlet,
-  useMatches,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { AppSidebar } from "../components/sidebar/Sidebar";
 import { Topbar } from "../components/Topbar";
 import { AppBreadcrumb } from "../components/Breadcrumb";
@@ -44,7 +35,6 @@ export const Route = createFileRoute("/posts")({
 
 function PostsLayout() {
   const navigate = useNavigate({ from: Route.fullPath });
-  const matches = useMatches();
 
   // Activated tags
   const { TagsControlComponent, add: addActivatedTags } = useTagsControl();
@@ -54,12 +44,7 @@ function PostsLayout() {
   const debouncedSearch = useDebounce(search, 500);
 
   // Settings
-  const {
-    r18,
-    source,
-    toggle: toggleSettings,
-    set: setSettings,
-  } = useSettingsStore();
+  const { filter, source, set: setSettings } = useSettingsStore();
 
   const {
     data: tagsResponse,
@@ -88,7 +73,7 @@ function PostsLayout() {
                 search={search}
                 setSearch={setSearch}
               />
-              <TagsControlComponent className="flex lg:hidden gap-2" />
+              <TagsControlComponent className="flex flex-wrap items-center lg:hidden gap-2" />
             </>
           ),
           groups: [
@@ -110,7 +95,10 @@ function PostsLayout() {
                       <div
                         key={i}
                         className="grid grid-cols-[1fr_auto] cursor-pointer"
-                        onClick={() => addActivatedTags(t.name)}
+                        onClick={() => {
+                          setSearch("");
+                          addActivatedTags(t.name);
+                        }}
                       >
                         <TruncatingTooltip text={t.name} />
                         <Badge variant={"outline"}>
@@ -143,28 +131,36 @@ function PostsLayout() {
                     </DialogDescription>
                   </DialogHeader>
                   <div className="w-full flex flex-col gap-4">
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="r18-toggle"
-                        checked={r18}
-                        onCheckedChange={() => toggleSettings("r18")}
-                      />
-                      <Label htmlFor="r18-toggle">Show R-18</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Label htmlFor="source-toggle">Source Switch</Label>
-                      <Select
+                    <div className="flex gap-4">
+                      <Label htmlFor="source-radio">Source Switch</Label>
+                      <RadioGroup
+                        id="source-radio"
                         value={source}
                         onValueChange={(value) => setSettings("source", value)}
                       >
-                        <SelectTrigger id="source-toggle" className="w-fit">
-                          <SelectValue placeholder="Source" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="danbooru">Danbooru</SelectItem>
-                          <SelectItem value="gelbooru">Gelbooru</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <div className="flex items-center gap-3">
+                          <RadioGroupItem value="danbooru" id="r1" />
+                          <Label htmlFor="r1">Danbooru</Label>
+                          <RadioGroupItem value="gelbooru" id="r2" />
+                          <Label htmlFor="r2">Gelbooru</Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                    <div className="flex gap-4">
+                      <Label htmlFor="filter-radio">Filter</Label>
+                      <RadioGroup
+                        value={filter}
+                        onValueChange={(value) => setSettings("filter", value)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <RadioGroupItem value="general" id="r1" />
+                          <Label htmlFor="r1">General</Label>
+                          <RadioGroupItem value="sensitive" id="r2" />
+                          <Label htmlFor="r2">Sensitive</Label>
+                          <RadioGroupItem value="explicit" id="r3" />
+                          <Label htmlFor="r3">Explicit</Label>
+                        </div>
+                      </RadioGroup>
                     </div>
                   </div>
                 </DialogContent>
