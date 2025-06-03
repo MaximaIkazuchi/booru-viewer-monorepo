@@ -3,14 +3,23 @@ package main
 import (
 	"booru-viewer/server/api"
 	"booru-viewer/server/client"
+	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+    if err != nil {
+        log.Fatal("Error loading .env file")
+    }
+	feOrigin := os.Getenv("FE_ORIGIN")
+
 	gelbooruClient := client.InitClient(client.SOURCE_GELBOORU, 10*time.Second)
 	gelbooruHandler := api.NewHandler(gelbooruClient)
 
@@ -19,7 +28,7 @@ func main() {
 
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"}, // frontend URL
+		AllowOrigins:     []string{"http://localhost:5173", feOrigin}, // frontend URL
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
