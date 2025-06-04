@@ -3,21 +3,15 @@ package main
 import (
 	"booru-viewer/server/api"
 	"booru-viewer/server/client"
-	"log"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	err := godotenv.Load()
-    if err != nil {
-        log.Fatal("Error loading .env file")
-    }
 	feOrigin := os.Getenv("FE_ORIGIN")
 
 	gelbooruClient := client.InitClient(client.SOURCE_GELBOORU, 10*time.Second)

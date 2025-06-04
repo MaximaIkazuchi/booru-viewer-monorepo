@@ -1,23 +1,17 @@
 services:
   backend:
     build:
-      context: ./apps/server
-    container_name: yabv-be-container
+      context: apps
+    container_name: yabv-container
+    environment:
+      - FE_ORIGIN=http://165.22.52.220:8080
     image: yabv-be
     ports:
       - "8080:8080"
     networks:
       - nginx-net
-
-  frontend:
-    build:
-      context: ./apps/web
-    container_name: yabv-fe-container
-    image: yabv-fe
-    ports:
-      - "6969:6969"
-    networks:
-      - nginx-net
+    volumes:
+      - ~/yabv/images:/app/images
 
 networks:
   nginx-net:

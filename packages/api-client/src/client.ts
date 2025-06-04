@@ -7,11 +7,7 @@ export type ApiClientConfig = {
 };
 
 export const getApiUrl = (): string => {
-  if (typeof import.meta !== undefined && "env" in import.meta) {
-    return import.meta.env.VITE_API_URL || "";
-  }
-
-  return "http://localhost:8080/api/v1";
+  return import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1";
 };
 
 export const defaultApiConfig: ApiClientConfig = {
